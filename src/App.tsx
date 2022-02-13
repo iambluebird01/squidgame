@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, KeyboardEvent } from 'react';
 import './App.css';
 import Contestant from './components/Contestant/Contestant';
 import Doll from './components/Doll/Doll';
 import Finish from './components/Finish/Finish';
 import Playground from './components/Playground/Playground';
+import Stoplight from './components/Stoplight/Stoplight';
 
 type ContestantType = {
   x: number;
@@ -16,8 +17,16 @@ function App() {
   const [, setState] = useState({});
   const contestants = useRef<ContestantType[]>([]);
   const finishedContestant = useRef<ContestantType>();
+  const playerContestant = useRef<ContestantType>({
+    x: Math.random() * (1277.33 - 50),
+    y: 1199,
+    name: 'BlueBird',
+    gameOver: false,
+    speed: 10,
+  });
   const greenLight = useRef(true);
   const greenLightCounter = useRef(100);
+  const divRef = useRef<HTMLDivElement>(null);
 
   const render = (timeStamp: number) => {
     greenLightCounter.current--;
@@ -28,6 +37,8 @@ function App() {
       greenLightCounter.current = 100 + Math.random() * 100;
     }
 
+    if (playerContestant.current.y < 100)
+      finishedContestant.current = playerContestant.current;
     for (let i = 0; i < contestants.current.length; i++) {
       if (contestants.current[i].y < 100) {
         //contestant has reached the finish line!
@@ -60,16 +71,26 @@ function App() {
       });
     }
 
+    divRef.current?.focus();
+
     requestAnimationFrame(render);
   }, []);
+
+  const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (greenLight.current && !playerContestant.current.gameOver)
+      playerContestant.current.y -= playerContestant.current.speed;
+    else playerContestant.current.gameOver = true;
+  };
+
   return (
-    <div className="App">
+    <div ref={divRef} tabIndex={0} onKeyDown={onKeyDown} className="App">
       {finishedContestant.current && (
         <div className="FinishedDialog">
           {finishedContestant.current.name} has reached the finish line!
         </div>
       )}
       <Playground>
+        <Stoplight />
         <Finish />
         <Doll />
         {contestants.current.map((c) => {
@@ -77,6 +98,12 @@ function App() {
             <Contestant x={c.x} y={c.y} name={c.name} gameOver={c.gameOver} />
           );
         })}
+        <Contestant
+          x={playerContestant.current.x}
+          y={playerContestant.current.y}
+          name={playerContestant.current.name}
+          gameOver={playerContestant.current.gameOver}
+        />
       </Playground>
     </div>
   );
