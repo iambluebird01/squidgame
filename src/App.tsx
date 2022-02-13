@@ -4,7 +4,6 @@ import Contestant from './components/Contestant/Contestant';
 import Doll from './components/Doll/Doll';
 import Finish from './components/Finish/Finish';
 import Playground from './components/Playground/Playground';
-import Stoplight from './components/Stoplight/Stoplight';
 
 type ContestantType = {
   x: number;
@@ -90,7 +89,6 @@ function App() {
         </div>
       )}
       <Playground>
-        <Stoplight />
         <Finish />
         <Doll />
         {contestants.current.map((c) => {
